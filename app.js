@@ -106,8 +106,8 @@ class JhcInquiry {
             gnmkdm: "N214505",
           },
           form: {
-            xnm: "2023",
-            xqm: "3",
+            xnm: this.xnm,
+            xqm: this.xqm,
             njdm_id: term,
             zyh_id: queryClass.zyh_id,
             bh_id: queryClass.bh_id,
