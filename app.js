@@ -20,7 +20,6 @@ class JhcInquiry {
     this.initial();
   }
   initial() {
-    console.log("----------------initial----------------");
     request(
       "https://rz.jhc.cn/zfca/login",
       {
@@ -29,6 +28,7 @@ class JhcInquiry {
         },
       },
       (err, res, body) => {
+        console.log("----------------initial----------------");
         try {
           if (err) throw Error(err);
           const $ = cheerio.load(body);
@@ -41,11 +41,11 @@ class JhcInquiry {
     );
   }
   getPubKey() {
-    console.log("----------------getPubKey----------------");
     request(
       "https://rz.jhc.cn/zfca/v2/getPubKey",
       undefined,
       (err, res, body) => {
+        console.log("----------------getPubKey----------------");
         try {
           if (err) throw Error(err);
           const json = JSON.parse(body);
@@ -59,7 +59,6 @@ class JhcInquiry {
     );
   }
   login() {
-    console.log("----------------login----------------");
     request(
       "https://rz.jhc.cn/zfca/login",
       {
@@ -77,9 +76,10 @@ class JhcInquiry {
         },
       },
       (err, res, body) => {
+        console.log("----------------login----------------");
         try {
           if (err) throw Error(err);
-          // this.queryCourse("计算机211");
+          if (res.statusCode == 403) throw Error("网站维护时间，暂停服务");
           this.loginStatus = true;
         } catch (error) {
           console.log("An error occurred in login because: ", error);
@@ -117,6 +117,10 @@ class JhcInquiry {
         },
         (err, res, body) => {
           try {
+            if (!body) {
+              reject("未找到课程信息");
+              return;
+            }
             if (err) throw Error(err);
             const json = JSON.parse(body);
             resolve(json);
@@ -132,20 +136,21 @@ class JhcInquiry {
 
 module.exports = JhcInquiry;
 
-// const jhcInquiry = new JhcInquiry("202110101550022", "*******");
+const jhcInquiry = new JhcInquiry("202110101550022", "Cjj00311_");
 
-// const express = require("express");
-// const app = express();
-// app.get("/", (req, res) => {
-//   jhcInquiry
-//     .queryCourse(req.query.className)
-//     .then((result) => {
-//       res.send(result);
-//     })
-//     .catch((err) => {
-//       res.status(500).send(err);
-//     });
-// });
-// app.listen(3000, () => {
-//   console.log("Example app listening on port 3000!");
-// });
+const express = require("express");
+const app = express();
+app.get("/", async (req, res) => {
+  const result = await jhcInquiry.queryCourse(req.query.className);
+  // jhcInquiry
+  //   .queryCourse(req.query.className)
+  //   .then((result) => {
+  //     res.send(result);
+  //   })
+  //   .catch((err) => {
+  //     res.status(500).send(err);
+  //   });
+});
+app.listen(3000, () => {
+  console.log("Example app listening on port 3000!");
+});
